@@ -154,7 +154,7 @@ export function getTokenForProvider(
   }
 }
 
-function initializeDatabase() {
+export function initializeDatabase() {
   if (process.env.POSTGRES_URL) {
     return new PostgresDatabaseAdapter({
       connectionString: process.env.POSTGRES_URL,
@@ -236,13 +236,16 @@ async function startAgent(character: Character, directClient: any) {
     const token = getTokenForProvider(character.modelProvider, character);
     const db = initializeDatabase();
 
+    // Create AgentRuntime instance with character config.
     const runtime = await createAgent(character, db, token);
 
+    // clinets is an array of Clinets: DirectClient and TwitterClient
     const clients = await initializeClients(
       character,
       runtime as IAgentRuntime
     );
 
+    // register agentRuntime for directClient?
     directClient.registerAgent(await runtime);
 
     return clients;
@@ -256,15 +259,19 @@ async function startAgent(character: Character, directClient: any) {
 }
 
 const startAgents = async () => {
+
+  // Is directClinet clinets for process input? 
   const directClient = await DirectClientInterface.start();
+
   const args = parseArguments();
 
   let charactersArg = args.characters || args.character;
 
-  let characters = [character];
+let characters = [character];
 
   if (charactersArg) {
     characters = await loadCharacters(charactersArg);
+    console.log("characters:", characters);
   }
 
   try {
@@ -289,6 +296,7 @@ const startAgents = async () => {
   chat();
 };
 
+// main function
 startAgents().catch((error) => {
   elizaLogger.error("Unhandled error in startAgents:", error);
   process.exit(1); // Exit the process after logging
@@ -299,6 +307,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+// realine is to read from process.stdin.
 async function handleUserInput(input, agentId) {
   if (input.toLowerCase() === "exit") {
     rl.close();

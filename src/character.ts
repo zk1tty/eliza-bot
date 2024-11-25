@@ -354,7 +354,7 @@ export const character: Character = {
     // ],
     // style: {
     //     all: [
-    //         "very short responses",
+    //         "very short responses"
     //         "never use hashtags or emojis",
     //         "response should be short, punchy, and to the point",
     //         "don't say ah yes or oh or anything",
