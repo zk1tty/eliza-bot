@@ -1,7 +1,6 @@
-<<<<<<< HEAD
 # John McCoffee Bot
 ## Template: Eliza
-made by Eliza template
+made by [Eliza starter template](https://github.com/eliza-ai/eliza-starter)
 
 
 ## How to use
