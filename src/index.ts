@@ -258,49 +258,45 @@ async function startAgent(character: Character, directClient: any) {
   }
 }
 
-const startAgents = async () => {
 
-  // Is directClinet clinets for process input? 
-  const directClient = await DirectClientInterface.start();
+// Main function
+// const startAgents = async () => {
 
-  const args = parseArguments();
+//   // Is directClinet clinets for process input? 
+//   const directClient = await DirectClientInterface.start();
 
-  let charactersArg = args.characters || args.character;
+//   const args = parseArguments();
 
-let characters = [character];
+//   let charactersArg = args.characters || args.character;
 
-  if (charactersArg) {
-    characters = await loadCharacters(charactersArg);
-    console.log("characters:", characters);
-  }
+// let characters = [character];
 
-  try {
-    for (const character of characters) {
-      await startAgent(character, directClient);
-    }
-  } catch (error) {
-    elizaLogger.error("Error starting agents:", error);
-  }
+//   if (charactersArg) {
+//     characters = await loadCharacters(charactersArg);
+//     console.log("characters:", characters);
+//   }
 
-  function chat() {
-    const agentId = characters[0].name ?? "Agent";
-    rl.question("You: ", async (input) => {
-      await handleUserInput(input, agentId);
-      if (input.toLowerCase() !== "exit") {
-        chat(); // Loop back to ask another question
-      }
-    });
-  }
+//   try {
+//     for (const character of characters) {
+//       await startAgent(character, directClient);
+//     }
+//   } catch (error) {
+//     elizaLogger.error("Error starting agents:", error);
+//   }
 
-  elizaLogger.log("Chat started. Type 'exit' to quit.");
-  chat();
-};
+//   function chat() {
+//     const agentId = characters[0].name ?? "Agent";
+//     rl.question("You: ", async (input) => {
+//       await handleUserInput(input, agentId);
+//       if (input.toLowerCase() !== "exit") {
+//         chat(); // Loop back to ask another question
+//       }
+//     });
+//   }
 
-// main function
-startAgents().catch((error) => {
-  elizaLogger.error("Unhandled error in startAgents:", error);
-  process.exit(1); // Exit the process after logging
-});
+//   elizaLogger.log("Chat started. Type 'exit' to quit.");
+//   chat();
+// };
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -336,3 +332,9 @@ async function handleUserInput(input, agentId) {
     console.error("Error fetching response:", error);
   }
 }
+
+// // Main functon
+// startAgents().catch((error) => {
+//   elizaLogger.error("Unhandled error in startAgents:", error);
+//   process.exit(1); // Exit the process after logging
+// });
