@@ -1,0 +1,11 @@
+[
+    "guest_id_marketing=secret;Domain=.twitter.com; Path=/;",
+    "guest_id_ads=secret;Domain=.twitter.com; Path=/;",
+    "personalization_id=secret;Domain=.twitter.com; Path=/;",
+    "guest_id=secret;Domain=.twitter.com; Path=/;",
+    "kdt=secretEaPqQbyHU2b5rbNIuEeE;Domain=.twitter.com; Path=/;",
+    "twid=secret;Domain=.twitter.com; Path=/;",
+    "ct0=secret;Domain=.twitter.com; Path=/;",
+    "auth_token=secret;Domain=.twitter.com; Path=/;",
+    "att=1-secret;Domain=.twitter.com; Path=/;"
+  ]

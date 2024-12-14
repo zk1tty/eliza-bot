@@ -23,6 +23,7 @@
     "@ai16z/plugin-node": "latest",
     "@ai16z/plugin-solana": "latest",
     "@ai16z/plugin-starknet": "latest",
+    "agent-twitter-client": "^0.0.16",
     "better-sqlite3": "^11.5.0",
     "readline": "^1.3.0",
     "ws": "^8.18.0",
