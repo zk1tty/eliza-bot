@@ -5,29 +5,30 @@
   "type": "module",
   "scripts": {
     "build": "tsup --format esm --dts",
-    "start": "tsc && node --loader ts-node/esm src/index.ts",
+    "start": "tsc && node --loader ts-node/esm src/index.ts --character='/Users/nori/Project/eliza-bot/characters/pepe2.character.json'",
     "start:service:all": "pm2 start pnpm --name=\"all\" --restart-delay=3000 --max-restarts=10 -- run start:all",
     "stop:service:all": "pm2 stop all"
   },
   "dependencies": {
-    "@ai16z/adapter-postgres": "latest",
-    "@ai16z/adapter-sqlite": "latest",
-    "@ai16z/client-auto": "latest",
-    "@ai16z/client-direct": "latest",
-    "@ai16z/client-discord": "latest",
-    "@ai16z/client-telegram": "latest",
-    "@ai16z/client-twitter": "latest",
-    "@ai16z/eliza": "latest",
-    "@ai16z/plugin-bootstrap": "latest",
-    "@ai16z/plugin-image-generation": "latest",
-    "@ai16z/plugin-node": "latest",
-    "@ai16z/plugin-solana": "latest",
-    "@ai16z/plugin-starknet": "latest",
+    "@ai16z/adapter-postgres": "0.1.3-alpha.2",
+    "@ai16z/adapter-sqlite": "0.1.3-alpha.2",
+    "@ai16z/client-auto": "0.1.3-alpha.2",
+    "@ai16z/client-direct": "0.1.3-alpha.2",
+    "@ai16z/client-discord": "0.1.3-alpha.2",
+    "@ai16z/client-telegram": "0.1.3-alpha.2",
+    "@ai16z/client-twitter": "0.1.3-alpha.2",
+    "@ai16z/eliza": "0.1.3-alpha.2",
+    "@ai16z/plugin-bootstrap": "0.1.3-alpha.2",
+    "@ai16z/plugin-image-generation": "0.1.3-alpha.2",
+    "@ai16z/plugin-node": "0.1.3-alpha.2",
+    "@ai16z/plugin-solana": "0.1.3-alpha.2",
+    "@ai16z/plugin-starknet": "0.1.3-alpha.2",
     "agent-twitter-client": "^0.0.16",
     "better-sqlite3": "^11.5.0",
     "readline": "^1.3.0",
     "ws": "^8.18.0",
-    "yargs": "17.7.2"
+    "yargs": "17.7.2",
+    "uuid": "^9.0.0"
   },
   "engines": {
     "node": ">=22"
@@ -40,6 +41,7 @@
   "devDependencies": {
     "ts-node": "10.9.2",
     "tsup": "^8.3.5",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "@types/uuid": "^9.0.0"
   }
 }
