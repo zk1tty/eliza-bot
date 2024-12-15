@@ -1,12 +1,6 @@
 // primitive Twitter client
 import { Scraper } from "agent-twitter-client";
 import fs from 'fs';
-import readline from "readline";
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
 
 export type { Scraper };
 
@@ -92,7 +86,7 @@ async function loadCookies(scraper: Scraper) {
 }
 
 // Main function to accept user input RL and and post to Twitter
-async function main() {
+export async function postTweet(message: string) {
   const scraper = new Scraper();
     
   try{
@@ -117,18 +111,27 @@ async function main() {
     }
 
     // Accept message input from command line
-    rl.question('Enter your tweet message: ', async (message) => {
+    const postMessage = async (message) => {
       // Try to send tweet
       try {
-        const sendTweetResults = await scraper.sendTweet(message);
+        const randomIndex = Math.floor(Math.random() * 8) + 1; // Generates a random number between 1 and 8
+        const mediaData = [
+          {
+            data: fs.readFileSync(`./meme_images/meme_${randomIndex}.jpg`),
+            mediaType: 'image/jpeg'
+          }
+        ];
+        console.log("trying to send tweet");
+        console.log("msg:", message);
+        console.log("img:", `meme_${randomIndex}.jpg`);
+        const sendTweetResults = await scraper.sendTweet(message, undefined, mediaData);
         sendTweetResults?.status == 200 
-        && console.log("Tweet sent successfully:", sendTweetResults):'';
+        && console.log("Tweet sent successfully:");
       } catch (error) {
         console.error("Error sending tweet:", error);
-      } finally {
-        rl.close(); // Close the readline interface after sending the tweet
       }
-    });
+    };
+    await postMessage(message);
 
   } catch (error) {
     console.error("Error in main function:", error);
@@ -137,6 +140,6 @@ async function main() {
 }
   
 // Start the application
-main().catch((error) => {
-    console.error("Error in main function:", error);
-});
+// postTweet().catch((error) => {
+//     console.error("Error in main function:", error);
+// });
