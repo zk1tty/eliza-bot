@@ -13,6 +13,7 @@ import {
   IAgentRuntime,
   ModelProviderName,
   elizaLogger,
+  stringToUuid
 } from "@ai16z/eliza";
 import { bootstrapPlugin } from "@ai16z/plugin-bootstrap";
 import { solanaPlugin } from "@ai16z/plugin-solana";
@@ -22,6 +23,14 @@ import fs from "fs";
 import readline from "readline";
 import yargs from "yargs";
 import { character } from "./character.ts";
+import { postTweet } from './postTweet.ts';
+import type { DirectClient } from "@ai16z/client-direct";
+import path from "path";
+import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from 'uuid';
+
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -219,84 +228,101 @@ export async function createAgent(
     modelProvider: character.modelProvider,
     evaluators: [],
     character,
-    plugins: [
-      bootstrapPlugin,
-      nodePlugin,
-      character.settings.secrets?.WALLET_PUBLIC_KEY ? solanaPlugin : null,
-    ].filter(Boolean),
+    plugins: [].filter(Boolean),
     providers: [],
     actions: [],
     services: [],
-    managers: [],
+    managers: []
   });
 }
 
-async function startAgent(character: Character, directClient: any) {
-  try {
-    const token = getTokenForProvider(character.modelProvider, character);
-    const db = initializeDatabase();
+function initializeDbCache(character: Character, db: any) {
+  // Implement cache initialization logic here
+  return {};
+}
 
-    // Create AgentRuntime instance with character config.
+async function startAgent(character: Character, directClient: DirectClient) {
+  try {
+    character.id = character.id ?? stringToUuid(character.name);
+
+    const token = getTokenForProvider(character.modelProvider, character);
+    const dataDir = path.join(__dirname, "../data");
+
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    const db = initializeDatabase();
     const runtime = await createAgent(character, db, token);
 
-    // clinets is an array of Clinets: DirectClient and TwitterClient
-    const clients = await initializeClients(
-      character,
-      runtime as IAgentRuntime
-    );
+    const clients = await initializeClients(character, await runtime);
 
-    // register agentRuntime for directClient?
     directClient.registerAgent(await runtime);
 
     return clients;
   } catch (error) {
-    console.error(
+    elizaLogger.error(
       `Error starting agent for character ${character.name}:`,
       error
     );
+    console.error(error);
     throw error;
   }
 }
 
-
 // Main function
-// const startAgents = async () => {
+const startAgents = async () => {
 
-//   // Is directClinet clinets for process input? 
-//   const directClient = await DirectClientInterface.start();
+  // Is directClinet clinets for just process input? 
+  const directClient = await DirectClientInterface.start();
 
-//   const args = parseArguments();
+  const args = parseArguments();
 
-//   let charactersArg = args.characters || args.character;
+  let charactersArg = args.characters || args.character;
 
-// let characters = [character];
+  let characters = [character];
 
-//   if (charactersArg) {
-//     characters = await loadCharacters(charactersArg);
-//     console.log("characters:", characters);
-//   }
+  if (charactersArg) {
+    characters = await loadCharacters(charactersArg);
+    console.log("characters:", characters);
+  }
 
-//   try {
-//     for (const character of characters) {
-//       await startAgent(character, directClient);
-//     }
-//   } catch (error) {
-//     elizaLogger.error("Error starting agents:", error);
-//   }
+  try {
+    for (const character of characters) {
+      await startAgent(character, directClient as DirectClient);
+    }
+  } catch (error) {
+    elizaLogger.error("Error starting agents:", error);
+  }
 
-//   function chat() {
-//     const agentId = characters[0].name ?? "Agent";
-//     rl.question("You: ", async (input) => {
-//       await handleUserInput(input, agentId);
-//       if (input.toLowerCase() !== "exit") {
-//         chat(); // Loop back to ask another question
-//       }
-//     });
-//   }
+  function chat() {
+    const agentId = characters[0].name ?? "Agent";
+    rl.question("You: ", async (input) => {
 
-//   elizaLogger.log("Chat started. Type 'exit' to quit.");
-//   chat();
-// };
+      const originalMessage = await handleUserInput(input, agentId);
+
+    //   // truncate 
+    //   function truncateMessage(message: string, maxLength: number): string {
+    //     if (message.length <= maxLength) {
+    //         return message;
+    //     }
+    //     return message.slice(0, maxLength - 3) + '...'; // Add ellipsis if truncated
+    // }
+    
+    // const truncatedMessage = truncateMessage(originalMessage, 140); // Truncate to 140 characters
+    // console.log(truncatedMessage);
+
+    //   await postTweet(truncatedMessage);
+      // how to get the answer from Agnet?
+      if (input.toLowerCase() !== "exit") {
+        chat(); // Loop back to ask another question
+      }
+    });
+  }
+
+  elizaLogger.log("Chat started. Type 'exit' to quit.");
+  chat();
+};
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -313,6 +339,7 @@ async function handleUserInput(input, agentId) {
   try {
     const serverPort = parseInt(settings.SERVER_PORT || "3000");
 
+    console.log("text input:", input);
     const response = await fetch(
       `http://localhost:${serverPort}/${agentId}/message`,
       {
@@ -327,14 +354,23 @@ async function handleUserInput(input, agentId) {
     );
 
     const data = await response.json();
+    console.log("reply from agnet:", data);
+    // data:
+    // {
+    //   user: 'johnmccoffee',
+    //   text: "Hey there, fellow freedom fighter! ☕✨ Ready to espresso your thoughts on the future of decentralized finance? Together, we can brew a storm that shakes up the centralized systems! Let's chat about how we can take $MCCOFFEE to the moon! 🚀 #ProofOfBrew #JoinTheRevolution",
+    //   action: 'encourage engagement'
+    // }
     data.forEach((message) => console.log(`${"Agent"}: ${message.text}`));
+    // TODO: trunk
+    return data[0].text;
   } catch (error) {
     console.error("Error fetching response:", error);
   }
 }
 
 // // Main functon
-// startAgents().catch((error) => {
-//   elizaLogger.error("Unhandled error in startAgents:", error);
-//   process.exit(1); // Exit the process after logging
-// });
+startAgents().catch((error) => {
+  elizaLogger.error("Unhandled error in startAgents:", error);
+  process.exit(1); // Exit the process after logging
+});
